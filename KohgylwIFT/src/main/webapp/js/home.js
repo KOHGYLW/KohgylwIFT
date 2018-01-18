@@ -49,7 +49,8 @@ function showFolderView(fid) {
 		error : function() {
 			$("#tb").html("<span class='graytext'>获取失败，请尝试刷新</span>");
 			$("#publishTime").html("<span class='graytext'>获取失败，请尝试刷新</span>");
-			$("#parentlistbox").html("<span class='graytext'>获取失败，请尝试刷新</span>");
+			$("#parentlistbox")
+					.html("<span class='graytext'>获取失败，请尝试刷新</span>");
 		}
 	});
 }
@@ -152,24 +153,25 @@ function showAccountView(folderView) {
 						"<button class='btn btn-link rightbtn' data-toggle='modal' data-target='#logoutModal'>注销 ["
 								+ folderView.account
 								+ "] <span class='glyphicon glyphicon-off' aria-hidden='true'></span></button>");
-		var authList = folderView.authList;
-		if (authList != null) {
-			if (checkAuth(authList, "C")) {
-				$("#parentlistbox")
-						.append(
-								"<button onclick='showNewFolderModel()' class='btn btn-link btn-xs rightbtn'><span class='glyphicon glyphicon-folder-open'></span> 新建文件夹</button>");
-			}
-			if (checkAuth(authList, "U")) {
-				$("#parentlistbox")
-						.append(
-								"<button onclick='showUploadFileModel()' class='btn btn-link btn-xs rightbtn'><span class='glyphicon glyphicon-cloud-upload'></span> 上传文件</button>");
-			}
-		}
 	} else {
 		// 说明用户未登录，显示登录按钮
 		$("#tb")
 				.append(
 						"<button class='btn btn-link rightbtn' data-toggle='modal' data-target='#loginModal'>登入<span class='glyphicon glyphicon-user' aria-hidden='true'></span></button>");
+	}
+	var authList = folderView.authList;
+	console.log(folderView);
+	if (authList != null) {
+		if (checkAuth(authList, "C")) {
+			$("#parentlistbox")
+					.append(
+							"<button onclick='showNewFolderModel()' class='btn btn-link btn-xs rightbtn'><span class='glyphicon glyphicon-folder-open'></span> 新建文件夹</button>");
+		}
+		if (checkAuth(authList, "U")) {
+			$("#parentlistbox")
+					.append(
+							"<button onclick='showUploadFileModel()' class='btn btn-link btn-xs rightbtn'><span class='glyphicon glyphicon-cloud-upload'></span> 上传文件</button>");
+		}
 	}
 }
 
@@ -225,12 +227,17 @@ function showFolderTable(folderView) {
 	var authList = folderView.authList;
 	var aD = false;
 	var aR = false;
+	var aL = false;
 	if (checkAuth(authList, "D")) {
 		aD = true;
 	}
 	if (checkAuth(authList, "R")) {
 		aR = true;
 	}
+	if (checkAuth(authList, "L")) {
+		aL = true;
+	}
+
 	$
 			.each(
 					folderView.folderList,
@@ -271,22 +278,21 @@ function showFolderTable(folderView) {
 			.each(
 					folderView.fileList,
 					function(n, fi) {
-						var fileRow = "<tr><td>"
-								+ fi.fileName
-								+ "</td><td>"
-								+ fi.fileCreationDate
-								+ "</td><td>"
-								+ fi.fileSize
-								+ "MB</td><td>"
-								+ fi.fileCreator
-								+ "</td><td><button onclick='showDownloadModel("
-								+ '"'
-								+ fi.fileId
-								+ '","'
-								+ fi.fileName
-								+ '"'
-								+ ")' class='btn btn-link btn-xs'><span class='glyphicon glyphicon-cloud-download'></span> 下载</button>";
-						if (checkAuth(authList, "D")) {
+						var fileRow = "<tr><td>" + fi.fileName + "</td><td>"
+								+ fi.fileCreationDate + "</td><td>"
+								+ fi.fileSize + "MB</td><td>" + fi.fileCreator
+								+ "</td><td>";
+						if (aL) {
+							fileRow = fileRow
+									+ "<button onclick='showDownloadModel("
+									+ '"'
+									+ fi.fileId
+									+ '","'
+									+ fi.fileName
+									+ '"'
+									+ ")' class='btn btn-link btn-xs'><span class='glyphicon glyphicon-cloud-download'></span> 下载</button>";
+						}
+						if (aD) {
 							fileRow = fileRow
 									+ "<button onclick='showDeleteFileModel("
 									+ '"'
@@ -296,9 +302,20 @@ function showFolderTable(folderView) {
 									+ '"'
 									+ ")' class='btn btn-link btn-xs'><span class='glyphicon glyphicon-remove'></span> 删除</button>";
 						}
-						if (checkAuth(authList, "R")) {
+						if (aR) {
 							fileRow = fileRow
-									+ "<button onclick='showRenameFileModel("+'"'+fi.fileId+'"'+","+'"'+fi.fileName+'"'+")' class='btn btn-link btn-xs'><span class='glyphicon glyphicon-wrench'></span> 重命名</button>";
+									+ "<button onclick='showRenameFileModel("
+									+ '"'
+									+ fi.fileId
+									+ '"'
+									+ ","
+									+ '"'
+									+ fi.fileName
+									+ '"'
+									+ ")' class='btn btn-link btn-xs'><span class='glyphicon glyphicon-wrench'></span> 重命名</button>";
+						}
+						if (!aR && !aD && !aL) {
+							fileRow = fileRow + "--";
 						}
 						fileRow = fileRow + "</td></tr>";
 						$("#foldertable").append(fileRow);
@@ -333,9 +350,7 @@ function createfolder() {
 			},
 			url : "homeController/newFolder.ajax",
 			success : function(result) {
-				if (result == "noAccount") {
-					showFolderAlert("提示：无用户信息，请重新登录");
-				} else if (result == "noAuthorized") {
+				if (result == "noAuthorized") {
 					showFolderAlert("提示：您的操作未被授权，创建文件夹失败");
 				} else if (result == "errorParameter") {
 					showFolderAlert("提示：参数不正确，创建文件夹失败");
@@ -397,10 +412,7 @@ function deleteFolder(folderId) {
 		},
 		url : "homeController/deleteFolder.ajax",
 		success : function(result) {
-			if (result == "noAccount") {
-				$('#deleteFolderMessage').text("提示：无用户信息，请重新登录");
-				$("#dmbutton").attr('disabled', false);
-			} else if (result == "noAuthorized") {
+			if (result == "noAuthorized") {
 				$('#deleteFolderMessage').text("提示：您的操作未被授权，删除文件夹失败");
 				$("#dmbutton").attr('disabled', false);
 			} else if (result == "errorParameter") {
@@ -458,9 +470,7 @@ function renameFolder(folderId) {
 			},
 			url : "homeController/renameFolder.ajax",
 			success : function(result) {
-				if (result == "noAccount") {
-					showRenameFolderAlert("提示：无用户信息，请重新登录");
-				} else if (result == "noAuthorized") {
+				if (result == "noAuthorized") {
 					showRenameFolderAlert("提示：您的操作未被授权，重命名失败");
 				} else if (result == "errorParameter") {
 					showRenameFolderAlert("提示：参数不正确，重命名失败");
@@ -533,9 +543,7 @@ function checkUploadFile() {
 		},
 		url : "homeController/checkUploadFile.ajax",
 		success : function(result) {
-			if (result == "noAccount") {
-				showUploadFileAlert("提示：无用户信息，请重新登录");
-			} else if (result == "errorParameter") {
+			if (result == "errorParameter") {
 				showUploadFileAlert("提示：参数不正确，无法开始上传");
 			} else if (result == "noAuthorized") {
 				showUploadFileAlert("提示：您的操作未被授权，无法开始上传");
@@ -620,10 +628,11 @@ function showUploadFileAlert(txt) {
 // 显示下载文件模态框
 function showDownloadModel(fileId, fileName) {
 	$("#downloadModal").modal('toggle');
-	$("#downloadFileName").text("提示：您确认要下载文件：["+fileName+"]么？");
-	$("#downloadFileBox").html(
-			"<button id='dlmbutton' type='button' class='btn btn-primary' onclick='dodownload("
-					+ '"' + fileId + '"' + ")'>开始下载</button>");
+	$("#downloadFileName").text("提示：您确认要下载文件：[" + fileName + "]么？");
+	$("#downloadFileBox")
+			.html(
+					"<button id='dlmbutton' type='button' class='btn btn-primary' onclick='dodownload("
+							+ '"' + fileId + '"' + ")'>开始下载</button>");
 	$("#dlmbutton").attr('disabled', false);
 }
 
@@ -631,11 +640,11 @@ function showDownloadModel(fileId, fileName) {
 function dodownload(fileId) {
 	$("#dlmbutton").attr('disabled', true);
 	$("#downloadFileName").text("提示：准备开始下载，请稍候...");
-	var t=setTimeout("$('#downloadModal').modal('hide');",800);
-	window.location.href = "homeController/downloadFile.do?fileId="+fileId;
+	var t = setTimeout("$('#downloadModal').modal('hide');", 800);
+	window.location.href = "homeController/downloadFile.do?fileId=" + fileId;
 }
 
-//显示删除文件模态框
+// 显示删除文件模态框
 function showDeleteFileModel(fileId, fileName) {
 	$('#deleteFileBox')
 			.html(
@@ -646,7 +655,7 @@ function showDeleteFileModel(fileId, fileName) {
 	$('#deleteFileModal').modal('toggle');
 }
 
-//执行删除文件操作
+// 执行删除文件操作
 function deleteFile(fileId) {
 	$("#dfmbutton").attr('disabled', true);
 	$('#deleteFileMessage').text("提示：正在删除，请稍候...");
@@ -658,10 +667,7 @@ function deleteFile(fileId) {
 		},
 		url : "homeController/deleteFile.ajax",
 		success : function(result) {
-			if (result == "noAccount") {
-				$('#deleteFileMessage').text("提示：无用户信息，请重新登录");
-				$("#dfmbutton").attr('disabled', false);
-			} else if (result == "noAuthorized") {
+			if (result == "noAuthorized") {
 				$('#deleteFileMessage').text("提示：您的操作未被授权，删除失败");
 				$("#dfmbutton").attr('disabled', false);
 			} else if (result == "errorParameter") {
@@ -685,8 +691,8 @@ function deleteFile(fileId) {
 	});
 }
 
-//显示重命名文件模态框
-function showRenameFileModel(fileId,fileName){
+// 显示重命名文件模态框
+function showRenameFileModel(fileId, fileName) {
 	$("#newFileNamealert").removeClass("alert");
 	$("#newFileNamealert").removeClass("alert-danger");
 	$("#filerenamebox").removeClass("has-error");
@@ -698,53 +704,51 @@ function showRenameFileModel(fileId,fileName){
 	$("#renameFileModal").modal('toggle');
 }
 
-//修改文件名
-function renameFile(fileId){
-	var reg = new RegExp("[\/\|\\s\\\\\*\\<\\>"+'"'+"]+","g");
-	var newFileName=$("#newfilename").val();
-	if(newFileName.length>0){
-		if(newFileName.length<128){
-			if(!reg.test(newFileName)){
+// 修改文件名
+function renameFile(fileId) {
+	var reg = new RegExp("[\/\|\\s\\\\\*\\<\\>" + '"' + "]+", "g");
+	var newFileName = $("#newfilename").val();
+	if (newFileName.length > 0) {
+		if (newFileName.length < 128) {
+			if (!reg.test(newFileName)) {
 				$.ajax({
-					type:"POST",
-					dataType:"text",
-					data:{
-						fileId:fileId,
-						newFileName:newFileName
+					type : "POST",
+					dataType : "text",
+					data : {
+						fileId : fileId,
+						newFileName : newFileName
 					},
-					url:"homeController/renameFile.ajax",
-					success:function(result){
-						if(result=="cannotRenameFile"){
+					url : "homeController/renameFile.ajax",
+					success : function(result) {
+						if (result == "cannotRenameFile") {
 							showRenameFolderAlert("提示：出现意外错误，可能未能重命名文件");
-						}else if(result=="renameFileSuccess"){
+						} else if (result == "renameFileSuccess") {
 							$('#renameFileModal').modal('hide');
 							showFolderView(locationpath);
-						}else if(result=="errorParameter"){
+						} else if (result == "errorParameter") {
 							showRenameFolderAlert("提示：参数错误，重命名失败");
-						}else if(result=="noAuthorized"){
+						} else if (result == "noAuthorized") {
 							showRenameFolderAlert("提示：您的操作未被授权，重命名失败");
-						}else if(result=="noAccount"){
-							showRenameFolderAlert("提示：无用户信息，请重新登录");
-						}else{
+						} else {
 							showRenameFolderAlert("提示：出现意外错误，可能未能重命名文件");
 						}
 					},
-					error:function(){
+					error : function() {
 						showRenameFolderAlert("提示：出现意外错误，可能未能重命名文件");
 					}
 				});
-			}else{
+			} else {
 				showRenameFolderAlert("提示：文件名中不应含有：空格 引号 / \ * | < > ");
 			}
-		}else{
+		} else {
 			showRenameFolderAlert("提示：文件名称太长");
 		}
-	}else{
+	} else {
 		showRenameFolderAlert("提示：文件名不能为空");
 	}
 }
 
-//显示重命名文件状态提示
+// 显示重命名文件状态提示
 function showRenameFolderAlert(txt) {
 	$("#newFileNamealert").addClass("alert");
 	$("#newFileNamealert").addClass("alert-danger");
@@ -752,9 +756,9 @@ function showRenameFolderAlert(txt) {
 	$("#newFileNamealert").text(txt);
 }
 
-//取消上传
-function abortUpload(){
-	if(xhr!=null){
+// 取消上传
+function abortUpload() {
+	if (xhr != null) {
 		xhr.abort();
 	}
 	$('#uploadFileModal').modal('hide');

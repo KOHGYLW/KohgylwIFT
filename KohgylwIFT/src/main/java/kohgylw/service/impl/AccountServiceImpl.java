@@ -1,9 +1,5 @@
 package kohgylw.service.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 

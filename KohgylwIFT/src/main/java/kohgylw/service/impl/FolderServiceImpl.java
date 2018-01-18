@@ -33,34 +33,30 @@ public class FolderServiceImpl implements FolderService {
 		String parentId = request.getParameter("parentId");
 		String folderName = request.getParameter("folderName");
 		String account = (String) request.getSession().getAttribute("ACCOUNT");
-		if (account != null) {
-			if (ConfigureReader.instance(request).authorized(account, AccountAuth.CREATE_NEW_FOLDER)) {
-				if (parentId != null && folderName != null && parentId.length() > 0 && folderName.length() > 0) {
-					if (TextFormateUtil.instance().matcherFolderName(folderName)) {
-						Folder parentFolder = fm.queryById(parentId);
-						if (parentFolder != null) {
-							Map<String, String> map = new HashMap<>();
-							map.put("parentId", parentId);
-							map.put("folderName", folderName);
-							Folder f = fm.queryByParentIdAndFolderName(map);
-							if (f != null) {
-								return "folderAlreadyExist";
-							} else {
-								f = new Folder();
-								f.setFolderId(UUID.randomUUID().toString());
-								f.setFolderName(folderName);
-								f.setFolderCreationDate(ServerTimeUtil.accurateToDay());
-								f.setFolderCreator(account);
-								f.setFolderParent(parentId);
-								int i = fm.insertNewFolder(f);
-								if (i > 0) {
-									return "createFolderSuccess";
-								} else {
-									return "cannotCreateFolder";
-								}
-							}
+		if (ConfigureReader.instance(request).authorized(account, AccountAuth.CREATE_NEW_FOLDER)) {
+			if (parentId != null && folderName != null && parentId.length() > 0 && folderName.length() > 0) {
+				if (TextFormateUtil.instance().matcherFolderName(folderName)) {
+					Folder parentFolder = fm.queryById(parentId);
+					if (parentFolder != null) {
+						Map<String, String> map = new HashMap<>();
+						map.put("parentId", parentId);
+						map.put("folderName", folderName);
+						Folder f = fm.queryByParentIdAndFolderName(map);
+						if (f != null) {
+							return "folderAlreadyExist";
 						} else {
-							return "errorParameter";
+							f = new Folder();
+							f.setFolderId(UUID.randomUUID().toString());
+							f.setFolderName(folderName);
+							f.setFolderCreationDate(ServerTimeUtil.accurateToDay());
+							f.setFolderCreator(account);
+							f.setFolderParent(parentId);
+							int i = fm.insertNewFolder(f);
+							if (i > 0) {
+								return "createFolderSuccess";
+							} else {
+								return "cannotCreateFolder";
+							}
 						}
 					} else {
 						return "errorParameter";
@@ -69,10 +65,10 @@ public class FolderServiceImpl implements FolderService {
 					return "errorParameter";
 				}
 			} else {
-				return "noAuthorized";
+				return "errorParameter";
 			}
 		} else {
-			return "noAccount";
+			return "noAuthorized";
 		}
 	}
 
@@ -81,27 +77,23 @@ public class FolderServiceImpl implements FolderService {
 		// TODO 自动生成的方法存根
 		String folderId = request.getParameter("folderId");
 		String account = (String) request.getSession().getAttribute("ACCOUNT");
-		if (account != null) {
-			if (ConfigureReader.instance(request).authorized(account, AccountAuth.DELETE_FILE_OR_FOLDER)) {
-				if (folderId != null && folderId.length() > 0) {
-					Folder folder = fm.queryById(folderId);
-					if (folder != null) {
-						if (fu.deleteAllChildFolder(request,folderId) > 0) {
-							return "deleteFolderSuccess";
-						} else {
-							return "cannotDeleteFolder";
-						}
+		if (ConfigureReader.instance(request).authorized(account, AccountAuth.DELETE_FILE_OR_FOLDER)) {
+			if (folderId != null && folderId.length() > 0) {
+				Folder folder = fm.queryById(folderId);
+				if (folder != null) {
+					if (fu.deleteAllChildFolder(request, folderId) > 0) {
+						return "deleteFolderSuccess";
 					} else {
-						return "errorParameter";
+						return "cannotDeleteFolder";
 					}
 				} else {
 					return "errorParameter";
 				}
 			} else {
-				return "noAuthorized";
+				return "errorParameter";
 			}
 		} else {
-			return "noAccount";
+			return "noAuthorized";
 		}
 	}
 
@@ -111,22 +103,18 @@ public class FolderServiceImpl implements FolderService {
 		String folderId = request.getParameter("folderId");
 		String newName = request.getParameter("newName");
 		String account = (String) request.getSession().getAttribute("ACCOUNT");
-		if (account != null) {
-			if (ConfigureReader.instance(request).authorized(account, AccountAuth.RENAME_FILE_OR_FOLDER)) {
-				if (folderId != null && folderId.length() > 0 && newName != null && newName.length() > 0) {
-					if (TextFormateUtil.instance().matcherFolderName(newName)) {
-						Folder folder = fm.queryById(folderId);
-						if (folder != null) {
-							Map<String, String> map=new HashMap<>();
-							map.put("folderId", folderId);
-							map.put("newName", newName);
-							if (fm.updateFolderNameById(map) > 0) {
-								return "renameFolderSuccess";
-							} else {
-								return "cannotRenameFolder";
-							}
+		if (ConfigureReader.instance(request).authorized(account, AccountAuth.RENAME_FILE_OR_FOLDER)) {
+			if (folderId != null && folderId.length() > 0 && newName != null && newName.length() > 0) {
+				if (TextFormateUtil.instance().matcherFolderName(newName)) {
+					Folder folder = fm.queryById(folderId);
+					if (folder != null) {
+						Map<String, String> map = new HashMap<>();
+						map.put("folderId", folderId);
+						map.put("newName", newName);
+						if (fm.updateFolderNameById(map) > 0) {
+							return "renameFolderSuccess";
 						} else {
-							return "errorParameter";
+							return "cannotRenameFolder";
 						}
 					} else {
 						return "errorParameter";
@@ -135,10 +123,10 @@ public class FolderServiceImpl implements FolderService {
 					return "errorParameter";
 				}
 			} else {
-				return "noAuthorized";
+				return "errorParameter";
 			}
 		} else {
-			return "noAccount";
+			return "noAuthorized";
 		}
 	}
 }
