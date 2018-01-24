@@ -71,7 +71,7 @@
 
 	<!-- 错误页面 -->
 	<error-page>
-		<error-code>400</error-code>
+		<error-code>404</error-code>
 		<location>/errorController/pageNotFound.do</location>
 	</error-page>
 	<!-- end 错误页面 -->
