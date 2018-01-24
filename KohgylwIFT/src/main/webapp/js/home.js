@@ -104,7 +104,7 @@ function dologin() {
 				} else {
 					$("#alertbox").addClass("alert");
 					$("#alertbox").addClass("alert-danger");
-					$("#alertbox").text("提示：无法登录，不能识别指令");
+					$("#alertbox").text("提示：无法登录，未知错误");
 				}
 			},
 			error : function() {

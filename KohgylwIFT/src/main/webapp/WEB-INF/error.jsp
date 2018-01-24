@@ -38,19 +38,18 @@
 			<div class="col-md-12">
 				<h2 class="centerText">
 					<span class="glyphicon glyphicon-exclamation-sign"
-						aria-hidden="true"></span>警告：系统出现意外错误！
+						aria-hidden="true"></span>错误：无法访问到的路径！
 				</h2>
 				<br />
-				<h4 class="centerText">十分抱歉，KIFT在运行过程中出现了一些意外错误。</h4>
+				<h4 class="centerText">您所要访问的路径无法访问，请检查URL是否正确。如果您不知道为何会出现该问题，请立即告知系统管理员。</h4>
 				<p class="centerText">这可能是由于以下问题引起：</p>
 				<ul class="centerText">
-					<li>访问路径无效</li>
-					<li>文件系统出现问题</li>
-					<li>系统内部逻辑错误</li>
-					<li>服务器内存溢出</li>
-					<li>其它未知问题</li>
+					<li>访问路径无效或非法</li>
+					<li>系统运行时出现意外错误</li>
+					<li>部署失误导致的页面丢失</li>
+					<li>网络问题</li>
 				</ul>
-				<p class="centerText">在问题发生后，系统已经对文件系统进行了自检，您现在可以返回主页查看是否解决问题。如果问题依旧存在，请通知管理人员。</p>
+				<p class="centerText">您可以使用以下链接返回系统主页：</p>
 				<p class="centerText"><a href="home.jsp"><span class="glyphicon glyphicon-home"></span>返回主页</a></p>
 			</div>
 		</div>

@@ -7,6 +7,17 @@
 	</listener>
 	<!-- end 数据库初始化 -->
 
+	<!-- 请求合法性检查 VC -->
+	<filter>
+		<filter-name>VCFilter</filter-name>
+		<filter-class>kohgylw.filter.VCFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>VCFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- end VC -->
+
 	<!-- spring MVC 配置 -->
 
 	<!-- 配置spring配置文件所在路径 -->
@@ -40,6 +51,12 @@
 
 	<!-- end spring MVC -->
 
+	<!-- 对文件系统进行自检 SC -->
+	<listener>
+		<listener-class>kohgylw.listener.SCListener</listener-class>
+	</listener>
+	<!-- end SC -->
+
 	<!-- session 过期时间 -->
 	<session-config>
 		<session-timeout>30</session-timeout>
@@ -54,16 +71,8 @@
 
 	<!-- 错误页面 -->
 	<error-page>
-		<exception-type>java.lang.Exception</exception-type>
-		<location>/errorController/handleError.do</location>
-	</error-page>
-	<error-page>
-		<error-code>500</error-code>
-		<location>/errorController/handleError.do</location>
-	</error-page>
-	<error-page>
 		<error-code>400</error-code>
-		<location>/errorController/handleError.do</location>
+		<location>/errorController/pageNotFound.do</location>
 	</error-page>
 	<!-- end 错误页面 -->
 

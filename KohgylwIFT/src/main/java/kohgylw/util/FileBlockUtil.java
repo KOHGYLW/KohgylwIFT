@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Component;
@@ -103,12 +104,12 @@ public class FileBlockUtil {
 	 * 自动对齐文件系统的node列表及block堆，如果出现引用失效的node或无法被引用的block，则将其清除
 	 * </p>
 	 * 
-	 * @param request
-	 *            HttpServletRequest 请求对象
+	 * @param c
+	 *            ServletContext 上下文对象
 	 * @return 无
 	 */
-	public void checkFileBlocks(HttpServletRequest request) {
-		String fileblocks = request.getServletContext().getRealPath("/fileblocks");
+	public void checkFileBlocks(ServletContext c) {
+		String fileblocks = c.getRealPath("/fileblocks");
 		Thread checkThread = new Thread(() -> {
 			List<kohgylw.model.File> nodes = fm.queryAll();
 			for (kohgylw.model.File node : nodes) {

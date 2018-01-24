@@ -46,4 +46,14 @@ public class ServerTimeUtil {
 		DateFormat df=new SimpleDateFormat("YYYY年MM月dd日");
 		return df.format(d);
 	}
+	
+	/**
+	 * 生成日志名称专用日期格式
+	 * <p>时间格式为{YYYY_MM_dd}</p>
+	 * */
+	public static String accurateToLogName() {
+		Date d=new Date();
+		DateFormat df=new SimpleDateFormat("YYYY_MM_dd");
+		return df.format(d);
+	}
 }
