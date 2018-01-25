@@ -31,8 +31,6 @@ public class VCFilter implements Filter{
 		//阻止对敏感访问路径的访问
 		if(url.startsWith("/etc/")||url.startsWith("//etc/")) {
 			hsr.getRequestDispatcher("/errorController/pageNotFound.do").forward(request, response);
-		}else if(url.startsWith("/log/")||url.startsWith("//log/")) {
-			hsr.getRequestDispatcher("/errorController/pageNotFound.do").forward(request, response);
 		}else if(url.startsWith("/fileblocks/")||url.startsWith("//fileblocks/")) {
 			hsr.getRequestDispatcher("/errorController/pageNotFound.do").forward(request, response);
 		}else {
