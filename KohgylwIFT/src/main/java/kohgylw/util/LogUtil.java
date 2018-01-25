@@ -3,14 +3,12 @@ package kohgylw.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import javax.servlet.ServletContext;
-
 import org.springframework.stereotype.Component;
 
 /**
  * 日志记录工具，主要负责将各种日志写入到文件中
  * <p>
- * 日志的默认写入位置为用户主目录（~）下的KohgylwIFT/log文件夹，日志文件的名称为YYYY_MM_dd.klog
+ * 日志的默认写入位置为用户主目录的文档（~/Documents/）下的KohgylwIFT/log文件夹，日志文件的名称为YYYY_MM_dd.klog
  * </p>
  * <h3>日志文件格式说明：</h3>
  * <p>
@@ -36,7 +34,12 @@ public class LogUtil {
 			}
 		}
 	}
-
+	
+	/**
+	 * 以格式化记录异常信息
+	 * <p>创建日志文件并写入异常信息，当同日期的日志文件存在时，则在其后面追加该信息</p>
+	 * @param e Exception 需要记录的异常对象
+	 * */
 	public void writeException(Exception e) {
 		writeToLog("Exception", e.getMessage());
 	}
