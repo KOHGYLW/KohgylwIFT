@@ -10,6 +10,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import kohgylw.enumeration.AccountAuth;
+import kohgylw.util.ConfigureReader;
+
 /**
  * 请求合法性检查过滤器
  * <p>该过滤器仅允许合法的请求通过，从而避免外部用户直接查看敏感文件例如项目配置和错误日志等。</p>
@@ -32,7 +35,13 @@ public class VCFilter implements Filter{
 		if(url.startsWith("/etc/")||url.startsWith("//etc/")) {
 			hsr.getRequestDispatcher("/errorController/pageNotFound.do").forward(request, response);
 		}else if(url.startsWith("/fileblocks/")||url.startsWith("//fileblocks/")) {
-			hsr.getRequestDispatcher("/errorController/pageNotFound.do").forward(request, response);
+			String account=(String) hsr.getSession().getAttribute("ACCOUNT");
+			//对于文件读取请求进行权限检查，避免未授权的访问进入
+			if(ConfigureReader.instance(hsr).authorized(account, AccountAuth.DOWNLOAD_FILES)) {
+				chain.doFilter(request, response);
+			}else {
+				hsr.getRequestDispatcher("/errorController/pageNotFound.do").forward(request, response);
+			}
 		}else {
 			chain.doFilter(request, response);
 		}
