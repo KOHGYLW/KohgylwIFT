@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import kohgylw.model.File;
 import kohgylw.service.AccountService;
 import kohgylw.service.FileService;
 import kohgylw.service.FolderService;
 import kohgylw.service.FolderViewService;
+import kohgylw.service.PlayVideoService;
 import kohgylw.service.ServerInfoService;
 
 @Controller
@@ -34,6 +36,9 @@ public class HomeController {
 	
 	@Resource
 	private FileService fis;
+	
+	@Resource
+	private PlayVideoService pvs;
 	
 	//获取服务器操作系统
 	@RequestMapping("/getServerOS.ajax")
@@ -107,5 +112,16 @@ public class HomeController {
 	@RequestMapping("/renameFile.ajax")
 	public @ResponseBody String renameFile(HttpServletRequest request) {
 		return fis.doRenameFile(request);
+	}
+	
+	@RequestMapping("/playVideo.do")
+	public String playVideo(HttpServletRequest request) {
+		File f=pvs.foundVideo(request);
+		if(f!=null) {
+			request.setAttribute("video", f);
+			return "WEB-INF/video";
+		}else {
+			return "WEB-INF/error";
+		}
 	}
 }
