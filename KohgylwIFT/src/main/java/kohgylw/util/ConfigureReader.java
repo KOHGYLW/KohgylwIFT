@@ -6,19 +6,18 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.ibatis.annotations.Case;
+
 import kohgylw.enumeration.AccountAuth;
+import kohgylw.enumeration.LogLevel;
 
 /**
  * 配置文件解析类
  * <p>
  * 该类中封装了对configure文件的解析操作，其实例由instance方法提供
  * </p>
- * 配置格式： 
- * account.list = user1,user2,user3... 
- * pwd.user1 = 123456 ... 
- * auth.admin = cud ... 
- * authOverall = l 
- * buff.size=1048576
+ * 配置格式： account.list = user1,user2,user3... pwd.user1 = 123456 ... auth.admin =
+ * cud ... authOverall = l buff.size=1048576
  */
 public class ConfigureReader {
 
@@ -37,10 +36,10 @@ public class ConfigureReader {
 				confp.load(fis);
 			} catch (Exception e) {
 				// TODO 自动生成的 catch 块
-				System.out.println("无法读取配置文件：etc/configure.properties");
+				System.out.println("KohgylwIFT:[Configure]cannot read file:etc/configure.properties");
 			}
 		} else {
-			System.out.println("无法读取配置文件：etc/configure.properties不存在。");
+			System.out.println("KohgylwIFT:[Configure]cannot read file:etc/configure.properties不存在。");
 		}
 	}
 
@@ -121,11 +120,11 @@ public class ConfigureReader {
 				String auths = "";
 				String accauth = confp.getProperty("auth." + account);
 				String overall = confp.getProperty("authOverall");
-				if(accauth!=null) {
-					auths=accauth;
+				if (accauth != null) {
+					auths = accauth;
 				}
-				if(overall!=null) {
-					auths=auths+overall;
+				if (overall != null) {
+					auths = auths + overall;
 				}
 				switch (auth) {
 				case CREATE_NEW_FOLDER:
@@ -162,7 +161,7 @@ public class ConfigureReader {
 					return false;
 				}
 			}
-		}else {
+		} else {
 			return false;
 		}
 	}
@@ -190,6 +189,60 @@ public class ConfigureReader {
 			}
 		} else {
 			return 1048576;
+		}
+	}
+
+	/**
+	 * 检查传入的日志等级是否符合设置
+	 * <p>日志等级层次为：None小于Runtime_Exception小于Event，传入低等级时返回false，传入相同等级或更高等级时返回true。<p>
+	 * @param l LogLevel 日志等级，传入为null时则永远返回false
+	 * @return boolean 是否具备该等级
+	 * */
+	public boolean inspectLogLevel(LogLevel l) {
+		int o=0;
+		int m=0;
+		if(l==null) {
+			return false;
+		}
+		switch (l) {
+		case None:
+			m=0;
+			break;
+		case Runtime_Exception:
+			m=1;
+		case Event:
+			m=2;
+			break;
+		default:
+			m=0;
+			break;
+		}
+		if(confp!=null) {
+			String ll = confp.getProperty("log");
+			if(ll==null) {
+				ll="";
+			}
+			switch (ll) {
+			case "N":
+				o=0;
+				break;
+			case "R":
+				o=1;
+				break;
+			case "E":
+				o=2;
+				break;
+			default:
+				o=1;
+				break;
+			}
+		}else {
+			o=1;
+		}
+		if(o>=m) {
+			return true;
+		}else {
+			return false;
 		}
 	}
 

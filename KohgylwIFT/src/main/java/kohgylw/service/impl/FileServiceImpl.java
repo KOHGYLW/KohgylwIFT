@@ -21,6 +21,7 @@ import kohgylw.model.File;
 import kohgylw.service.FileService;
 import kohgylw.util.ConfigureReader;
 import kohgylw.util.FileBlockUtil;
+import kohgylw.util.LogUtil;
 import kohgylw.util.ServerTimeUtil;
 import kohgylw.util.TextFormateUtil;
 
@@ -32,6 +33,9 @@ public class FileServiceImpl implements FileService {
 
 	@Resource
 	private FileBlockUtil fbu;
+
+	@Resource
+	private LogUtil lu;
 
 	@Override
 	public String checkUploadFile(HttpServletRequest request) {
@@ -91,6 +95,7 @@ public class FileServiceImpl implements FileService {
 						f.setFilePath(path);
 						f.setFileSize(fsize);
 						if (fm.insert(f) > 0) {
+							lu.writeUploadFileEvent(request, f);
 							return "uploadsuccess";
 						} else {
 							return "uploaderror";
@@ -119,6 +124,7 @@ public class FileServiceImpl implements FileService {
 					String fileblocks = request.getServletContext().getRealPath("/fileblocks");
 					if (fbu.deleteFromFileBlocks(fileblocks, file.getFilePath())) {
 						if (fm.deleteById(fileId) > 0) {
+							lu.writeDeleteFileEvent(request, file);
 							return "deleteFileSuccess";
 						} else {
 							return "cannotDeleteFile";
@@ -140,8 +146,8 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public void doDownloadFile(HttpServletRequest request, HttpServletResponse response) {
 		// TODO 自动生成的方法存根
-		String account=(String) request.getSession().getAttribute("ACCOUNT");
-		if(ConfigureReader.instance(request).authorized(account, AccountAuth.DOWNLOAD_FILES)) {
+		String account = (String) request.getSession().getAttribute("ACCOUNT");
+		if (ConfigureReader.instance(request).authorized(account, AccountAuth.DOWNLOAD_FILES)) {
 			String fileId = request.getParameter("fileId");
 			if (fileId != null) {
 				File f = fm.queryById(fileId);
@@ -166,6 +172,7 @@ public class FileServiceImpl implements FileService {
 						}
 						bis.close();
 						fis.close();
+						lu.writeDownloadFileEvent(request, f);
 					} catch (Exception e) {
 						// TODO 自动生成的 catch 块
 					}
@@ -189,6 +196,7 @@ public class FileServiceImpl implements FileService {
 						map.put("fileId", fileId);
 						map.put("newFileName", newFileName);
 						if (fm.updateFileNameById(map) > 0) {
+							lu.writeRenameFileEvent(request, file, newFileName);
 							return "renameFileSuccess";
 						} else {
 							return "cannotRenameFile";

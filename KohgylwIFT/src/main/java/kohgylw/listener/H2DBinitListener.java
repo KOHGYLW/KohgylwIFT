@@ -67,10 +67,10 @@ public class H2DBinitListener implements ServletContextListener {
 			}
 			state1.close();
 			conn.close();
-			System.out.println("KohgylwIFT:SUCCESS h2db data storage location init complete");
+			System.out.println("KohgylwIFT:[INIT]SUCCESS:h2db data storage location init complete");
 		} catch (Exception e) {
 			// TODO 自动生成的 catch 块
-			System.out.println("KohgylwIFT:ERROR cannot init h2db with path '{USER_HOME}/Documents/kohgylwift/'");
+			System.out.println("KohgylwIFT:[INIT]ERROR:cannot init h2db with path '{USER_HOME}/Documents/kohgylwift/'");
 			e.printStackTrace();
 		}
 	}

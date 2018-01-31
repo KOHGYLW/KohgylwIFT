@@ -28,7 +28,7 @@ public class ErrorController {
 	// 全局异常处理
 	@ExceptionHandler(Exception.class)
 	public @ResponseBody String handleException(HttpServletRequest request, Exception e) {
-		lu.writeException(e);
+		lu.writeException(e,request);
 		fbu.checkFileBlocks(request.getServletContext());
 		return "handleException";
 	}

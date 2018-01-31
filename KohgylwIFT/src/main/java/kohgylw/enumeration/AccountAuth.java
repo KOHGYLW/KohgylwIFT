@@ -7,6 +7,8 @@ package kohgylw.enumeration;
  * <li>CREATE_NEW_FOLDER 创建新文件夹</li>
  * <li>UPLOAD_FILES 上传文件</li>
  * <li>DELETE_FILE_OR_FOLDER 删除文件或文件夹</li>
+ * <li>RENAME_FILE_OR_FOLDER 重命名文件或文件夹</li>
+ * <li>DOWNLOAD_FILES 下载文件</li>
  * </ul>
  * */
 public enum AccountAuth {

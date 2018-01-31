@@ -1,6 +1,7 @@
 package kohgylw.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import kohgylw.model.Folder;
 import kohgylw.service.FolderService;
 import kohgylw.util.ConfigureReader;
 import kohgylw.util.FolderUtil;
+import kohgylw.util.LogUtil;
 import kohgylw.util.ServerTimeUtil;
 import kohgylw.util.TextFormateUtil;
 
@@ -26,6 +28,9 @@ public class FolderServiceImpl implements FolderService {
 
 	@Resource
 	private FolderUtil fu;
+	
+	@Resource
+	private LogUtil lu;
 
 	@Override
 	public String newFolder(HttpServletRequest request) {
@@ -53,6 +58,7 @@ public class FolderServiceImpl implements FolderService {
 							f.setFolderParent(parentId);
 							int i = fm.insertNewFolder(f);
 							if (i > 0) {
+								lu.writeCreateFolderEvent(request, f);//进行日志记录
 								return "createFolderSuccess";
 							} else {
 								return "cannotCreateFolder";
@@ -81,7 +87,9 @@ public class FolderServiceImpl implements FolderService {
 			if (folderId != null && folderId.length() > 0) {
 				Folder folder = fm.queryById(folderId);
 				if (folder != null) {
+					List<Folder> l=fu.getParentList(folderId);//避免删除后导致无法获取父级文件的尴尬
 					if (fu.deleteAllChildFolder(request, folderId) > 0) {
+						lu.writeDeleteFolderEvent(request, folder,l);
 						return "deleteFolderSuccess";
 					} else {
 						return "cannotDeleteFolder";
@@ -112,6 +120,7 @@ public class FolderServiceImpl implements FolderService {
 						map.put("folderId", folderId);
 						map.put("newName", newName);
 						if (fm.updateFolderNameById(map) > 0) {
+							lu.writeRenameFolderEvent(request, folder, newName);
 							return "renameFolderSuccess";
 						} else {
 							return "cannotRenameFolder";
