@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Component;
 
-import kohgylw.enumeration.AccountAuth;
 import kohgylw.enumeration.LogLevel;
 import kohgylw.mapper.FileMapper;
 import kohgylw.mapper.FolderMapper;

@@ -27,7 +27,7 @@ public class PlayVideoServiceImpl implements PlayVideoService {
 				String account=(String) request.getSession().getAttribute("ACCOUNT");
 				if(ConfigureReader.instance(request).authorized(account, AccountAuth.DOWNLOAD_FILES)) {
 					String fileName=f.getFileName();
-					String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+					String suffix = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 					if(suffix.equals("mp4")||suffix.equals("webm")) {
 						return f;
 					}

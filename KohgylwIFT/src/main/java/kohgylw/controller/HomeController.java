@@ -15,8 +15,10 @@ import kohgylw.service.AccountService;
 import kohgylw.service.FileService;
 import kohgylw.service.FolderService;
 import kohgylw.service.FolderViewService;
+import kohgylw.service.PdfViewService;
 import kohgylw.service.PlayVideoService;
 import kohgylw.service.ServerInfoService;
+import kohgylw.service.ShowPictureService;
 
 @Controller
 @RequestMapping("/homeController")
@@ -39,6 +41,12 @@ public class HomeController {
 	
 	@Resource
 	private PlayVideoService pvs;
+	
+	@Resource
+	private PdfViewService pdvs;
+	
+	@Resource
+	private ShowPictureService sps;
 	
 	//获取服务器操作系统
 	@RequestMapping("/getServerOS.ajax")
@@ -114,12 +122,36 @@ public class HomeController {
 		return fis.doRenameFile(request);
 	}
 	
+	//播放视频
 	@RequestMapping("/playVideo.do")
 	public String playVideo(HttpServletRequest request) {
 		File f=pvs.foundVideo(request);
 		if(f!=null) {
 			request.setAttribute("video", f);
 			return "WEB-INF/video";
+		}else {
+			return "WEB-INF/error";
+		}
+	}
+	
+	//预览PDF
+	@RequestMapping("/pdfView.do")
+	public String pdfView(HttpServletRequest request) {
+		File f=pdvs.foundPdf(request);
+		if(f!=null) {
+			return "redirect:/pdfview/web/viewer.jsp?file=/KohgylwIFT/fileblocks/"+f.getFilePath();
+		}else {
+			return "WEB-INF/error";
+		}
+	}
+	
+	//查看图片
+	@RequestMapping("/showPicture.do")
+	public String showPicture(HttpServletRequest request) {
+		File f=sps.foundPicture(request);
+		if(f!=null) {
+			request.setAttribute("picture", f);
+			return "WEB-INF/picture";
 		}else {
 			return "WEB-INF/error";
 		}

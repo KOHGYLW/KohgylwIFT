@@ -6,8 +6,6 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.ibatis.annotations.Case;
-
 import kohgylw.enumeration.AccountAuth;
 import kohgylw.enumeration.LogLevel;
 
