@@ -139,7 +139,7 @@ public class HomeController {
 	public String pdfView(HttpServletRequest request) {
 		File f=pdvs.foundPdf(request);
 		if(f!=null) {
-			return "redirect:/pdfview/web/viewer.jsp?file=/KohgylwIFT/fileblocks/"+f.getFilePath();
+			return "redirect:/pdfview/web/viewer.jsp?file="+request.getContextPath()+"/fileblocks/"+f.getFilePath();
 		}else {
 			return "WEB-INF/error";
 		}
