@@ -28,7 +28,7 @@ public class FolderServiceImpl implements FolderService {
 
 	@Resource
 	private FolderUtil fu;
-	
+
 	@Resource
 	private LogUtil lu;
 
@@ -54,11 +54,15 @@ public class FolderServiceImpl implements FolderService {
 							f.setFolderId(UUID.randomUUID().toString());
 							f.setFolderName(folderName);
 							f.setFolderCreationDate(ServerTimeUtil.accurateToDay());
-							f.setFolderCreator(account);
+							if (account != null) {
+								f.setFolderCreator(account);
+							}else {
+								f.setFolderCreator("匿名用户");
+							}
 							f.setFolderParent(parentId);
 							int i = fm.insertNewFolder(f);
 							if (i > 0) {
-								lu.writeCreateFolderEvent(request, f);//进行日志记录
+								lu.writeCreateFolderEvent(request, f);// 进行日志记录
 								return "createFolderSuccess";
 							} else {
 								return "cannotCreateFolder";
@@ -87,9 +91,9 @@ public class FolderServiceImpl implements FolderService {
 			if (folderId != null && folderId.length() > 0) {
 				Folder folder = fm.queryById(folderId);
 				if (folder != null) {
-					List<Folder> l=fu.getParentList(folderId);//避免删除后导致无法获取父级文件的尴尬
+					List<Folder> l = fu.getParentList(folderId);// 避免删除后导致无法获取父级文件的尴尬
 					if (fu.deleteAllChildFolder(request, folderId) > 0) {
-						lu.writeDeleteFolderEvent(request, folder,l);
+						lu.writeDeleteFolderEvent(request, folder, l);
 						return "deleteFolderSuccess";
 					} else {
 						return "cannotDeleteFolder";

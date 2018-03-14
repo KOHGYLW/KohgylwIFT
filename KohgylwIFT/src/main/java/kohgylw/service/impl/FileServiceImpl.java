@@ -88,7 +88,11 @@ public class FileServiceImpl implements FileService {
 					} else {
 						File f = new File();
 						f.setFileId(UUID.randomUUID().toString());
-						f.setFileCreator(account);
+						if (account != null) {
+							f.setFileCreator(account);
+						} else {
+							f.setFileCreator("匿名用户");
+						}
 						f.setFileCreationDate(ServerTimeUtil.accurateToDay());
 						f.setFileName(filename);
 						f.setFileParentFolder(folderId);
