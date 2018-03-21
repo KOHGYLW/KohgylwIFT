@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import kohgylw.enumeration.AccountAuth;
 import kohgylw.mapper.FileMapper;
 import kohgylw.model.File;
@@ -42,27 +45,33 @@ public class FileServiceImpl implements FileService {
 		// TODO 自动生成的方法存根
 		String account = (String) request.getSession().getAttribute("ACCOUNT");
 		String folderId = request.getParameter("folderId");
-		String filename = request.getParameter("filename");
-		if (folderId != null && folderId.length() > 0 && filename != null && filename.length() > 0) {
-			if (ConfigureReader.instance(request).authorized(account, AccountAuth.UPLOAD_FILES)) {
-				List<File> files = fm.queryByParentFolderId(folderId);
-				boolean duplication = false;
-				for (File f : files) {
-					if (f.getFileName().equals(filename)) {
-						duplication = true;
+		String namelist = request.getParameter("namelist");
+		Gson g = new Gson();
+		List<String> namelistObj = g.fromJson(namelist, new TypeToken<List<String>>() {
+		}.getType());
+		for (String filename : namelistObj) {
+			if (folderId != null && folderId.length() > 0 && filename != null && filename.length() > 0) {
+				if (ConfigureReader.instance(request).authorized(account, AccountAuth.UPLOAD_FILES)) {
+					List<File> files = fm.queryByParentFolderId(folderId);
+					boolean duplication = false;
+					for (File f : files) {
+						if (f.getFileName().equals(filename)) {
+							duplication = true;
+						}
 					}
-				}
-				if (!duplication) {
-					return "permitUpload";
+					if (!duplication) {
+
+					} else {
+						return "duplicationFileName:"+filename;
+					}
 				} else {
-					return "duplicationFileName";
+					return "noAuthorized";
 				}
 			} else {
-				return "noAuthorized";
+				return "errorParameter";
 			}
-		} else {
-			return "errorParameter";
 		}
+		return "permitUpload";
 	}
 
 	@Override

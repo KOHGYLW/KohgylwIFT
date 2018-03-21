@@ -243,5 +243,29 @@ public class ConfigureReader {
 			return false;
 		}
 	}
+	
+	/**
+	 * 
+	 * 判断是否开启了“必须登录”设置
+	 * <p>该设置如果开启，则任何操作必须在登录的前提下进行，包括进入应用主页查看文件列表。默认为关闭。</p>
+	 * @author 青阳龙野(kohgylw)
+	 * @return boolean 是否开启
+	 */
+	public boolean mustLogin() {
+		if(confp!=null) {
+			String s=confp.getProperty("mustLogin");
+			if(s!=null) {
+				if(s.equals("N")) {
+					return true;
+				}else {
+					return false;
+				}
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+	}
 
 }
