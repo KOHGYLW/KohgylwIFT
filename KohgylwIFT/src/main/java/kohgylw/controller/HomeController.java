@@ -156,4 +156,15 @@ public class HomeController {
 			return "WEB-INF/error";
 		}
 	}
+	
+	//删除所有被选中的文件
+	@RequestMapping("/deleteCheckedFiles.ajax")
+	public @ResponseBody String deleteCheckedFiles(HttpServletRequest request) {
+		return fis.deleteCheckedFiles(request);
+	}
+	
+	@RequestMapping("/downloadCheckedFiles.do")
+	public void downloadCheckedFiles(HttpServletRequest request,HttpServletResponse response) {
+		fis.downloadCheckedFiles(request, response);
+	}
 }

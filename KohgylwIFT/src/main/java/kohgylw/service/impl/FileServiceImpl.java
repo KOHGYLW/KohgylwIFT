@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,7 +61,7 @@ public class FileServiceImpl implements FileService {
 					if (!duplication) {
 
 					} else {
-						return "duplicationFileName:"+filename;
+						return "duplicationFileName:" + filename;
 					}
 				} else {
 					return "noAuthorized";
@@ -225,6 +224,89 @@ public class FileServiceImpl implements FileService {
 			}
 		} else {
 			return "noAuthorized";
+		}
+	}
+
+	@Override
+	public String deleteCheckedFiles(HttpServletRequest request) {
+		// TODO 自动生成的方法存根
+		String strIdList = request.getParameter("strIdList");
+		String account = (String) request.getSession().getAttribute("ACCOUNT");
+		if (ConfigureReader.instance(request).authorized(account, AccountAuth.DELETE_FILE_OR_FOLDER)) {
+			Gson g = new Gson();
+			try {
+				List<String> idList = g.fromJson(strIdList, new TypeToken<List<String>>() {
+				}.getType());
+				for (String fileId : idList) {
+					if (fileId != null && fileId.length() > 0) {
+						File file = fm.queryById(fileId);
+						if (file != null) {
+							String fileblocks = request.getServletContext().getRealPath("/fileblocks");
+							if (fbu.deleteFromFileBlocks(fileblocks, file.getFilePath())) {
+								if (fm.deleteById(fileId) > 0) {
+									lu.writeDeleteFileEvent(request, file);
+								} else {
+									return "cannotDeleteFile";
+								}
+							} else {
+								return "cannotDeleteFile";
+							}
+						} else {
+							return "errorParameter";
+						}
+					} else {
+						return "errorParameter";
+					}
+				}
+				return "deleteFileSuccess";
+			} catch (Exception e) {
+				// TODO: handle exception
+				return "errorParameter";
+			}
+		} else {
+			return "noAuthorized";
+		}
+	}
+
+	@Override
+	public void downloadCheckedFiles(HttpServletRequest request, HttpServletResponse response) {
+		// TODO 自动生成的方法存根
+		String account = (String) request.getSession().getAttribute("ACCOUNT");
+		if (ConfigureReader.instance(request).authorized(account, AccountAuth.DOWNLOAD_FILES)) {
+			String strIdList = request.getParameter("strIdList");
+			Gson g = new Gson();
+			try {
+				List<String> idList = g.fromJson(strIdList, new TypeToken<List<String>>() {
+				}.getType());
+				if (idList.size() > 0) {
+					String fileBlocks = request.getServletContext().getRealPath("/fileblocks");
+					String tfPath = request.getServletContext().getRealPath("/temporaryfiles");
+					String zipname = fbu.createZip(idList, tfPath, fileBlocks);
+					java.io.File zip = new java.io.File(tfPath, zipname);
+					if (zip.exists()) {
+						response.setContentType("application/force-download");// 以下载方式接受输出流
+						response.setHeader("Content-Length", "" + zip.length());// 告知浏览器文件总大小
+						// 设置能够使用中文编码的文件名
+						response.addHeader("Content-Disposition",
+								"attachment;fileName=" + URLEncoder.encode("kiftd_"+ServerTimeUtil.accurateToDay()+"_打包下载.zip", "UTF-8"));
+						FileInputStream fis = new FileInputStream(zip);
+						BufferedInputStream bis = new BufferedInputStream(fis);
+						OutputStream out = response.getOutputStream();
+						byte[] buffer = new byte[ConfigureReader.instance(request).getBuffSize()];
+						int count = 0;
+						while ((count = bis.read(buffer)) != -1) {
+							out.write(buffer, 0, count);
+						}
+						bis.close();
+						fis.close();
+						lu.writeDownloadCheckedFileEvent(request, idList);
+						zip.delete();//删除临时zip防止越堆越多
+					}
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
 		}
 	}
 

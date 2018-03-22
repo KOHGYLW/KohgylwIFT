@@ -63,7 +63,7 @@ public class LogUtil {
 	 */
 	public void writeException(Exception e, HttpServletRequest request) {
 		if (ConfigureReader.instance(request).inspectLogLevel(LogLevel.Runtime_Exception)) {
-			writeToLog("Exception", "["+e+"]:"+e.getMessage());
+			writeToLog("Exception", "[" + e + "]:" + e.getMessage());
 		}
 	}
 
@@ -127,14 +127,14 @@ public class LogUtil {
 	 * 写入删除文件夹信息
 	 * </p>
 	 */
-	public void writeDeleteFolderEvent(HttpServletRequest request, Folder f,List<Folder> l) {
+	public void writeDeleteFolderEvent(HttpServletRequest request, Folder f, List<Folder> l) {
 		if (ConfigureReader.instance(request).inspectLogLevel(LogLevel.Event)) {
 			String account = (String) request.getSession().getAttribute("ACCOUNT");
 			if (account == null || account.length() == 0) {
 				account = "Anonymous";
 			}
-			String a=account;
-			Thread t=new Thread(()->{
+			String a = account;
+			Thread t = new Thread(() -> {
 				String pl = new String();
 				for (Folder i : l) {
 					pl = pl + i.getFolderName() + "/";
@@ -159,8 +159,8 @@ public class LogUtil {
 			if (account == null || account.length() == 0) {
 				account = "Anonymous";
 			}
-			String a=account;
-			Thread t=new Thread(()->{
+			String a = account;
+			Thread t = new Thread(() -> {
 				Folder folder = fm.queryById(f.getFileParentFolder());
 				List<Folder> l = fu.getParentList(folder.getFolderId());
 				String pl = new String();
@@ -187,8 +187,8 @@ public class LogUtil {
 			if (account == null || account.length() == 0) {
 				account = "Anonymous";
 			}
-			String a=account;
-			Thread t=new Thread(()->{
+			String a = account;
+			Thread t = new Thread(() -> {
 				Folder folder = fm.queryById(f.getFileParentFolder());
 				List<Folder> l = fu.getParentList(folder.getFolderId());
 				String pl = new String();
@@ -215,8 +215,8 @@ public class LogUtil {
 			if (account == null || account.length() == 0) {
 				account = "Anonymous";
 			}
-			String a=account;
-			Thread t=new Thread(()->{
+			String a = account;
+			Thread t = new Thread(() -> {
 				Folder folder = fm.queryById(f.getFileParentFolder());
 				List<Folder> l = fu.getParentList(folder.getFolderId());
 				String pl = new String();
@@ -243,8 +243,8 @@ public class LogUtil {
 			if (account == null || account.length() == 0) {
 				account = "Anonymous";
 			}
-			String a=account;
-			Thread t=new Thread(()->{
+			String a = account;
+			Thread t = new Thread(() -> {
 				Folder folder = fm.queryById(f.getFileParentFolder());
 				List<Folder> l = fu.getParentList(folder.getFolderId());
 				String pl = new String();
@@ -282,6 +282,43 @@ public class LogUtil {
 				System.out.println("KohgylwIFT:[Log]Cannt write to file,message:" + e1.getMessage());
 			}
 		}
+	}
+
+	/**
+	 * 以格式化记录下载文件日志
+	 * <p>
+	 * 写入下载文件信息
+	 * </p>
+	 */
+	public void writeDownloadCheckedFileEvent(HttpServletRequest request, List<String> idList) {
+		if (ConfigureReader.instance(request).inspectLogLevel(LogLevel.Event)) {
+			String account = (String) request.getSession().getAttribute("ACCOUNT");
+			if (account == null || account.length() == 0) {
+				account = "Anonymous";
+			}
+			String a = account;
+			Thread t = new Thread(() -> {
+				StringBuffer content = new StringBuffer(
+						">ACCOUNT [" + a + "]\r\n>OPERATE [Download checked file]\r\n----------------\r\n");
+				for (String fid : idList) {
+					kohgylw.model.File f = fim.queryById(fid);
+					if (f != null) {
+						Folder folder = fm.queryById(f.getFileParentFolder());
+						List<Folder> l = fu.getParentList(folder.getFolderId());
+						String pl = new String();
+						for (Folder i : l) {
+							pl = pl + i.getFolderName() + "/";
+						}
+						content.append(
+								">PATH [" + pl + folder.getFolderName() + "]\r\n>NAME [" + f.getFileName() + "]\r\n");
+					}
+				}
+				content.append("----------------");
+				writeToLog("Event", content.toString());
+			});
+			t.start();
+		}
+
 	}
 
 }

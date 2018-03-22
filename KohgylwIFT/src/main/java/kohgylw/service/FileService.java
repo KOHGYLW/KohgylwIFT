@@ -2,7 +2,6 @@ package kohgylw.service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
@@ -72,5 +71,28 @@ public interface FileService {
 	 * </ul>
 	 * */
 	String doRenameFile(HttpServletRequest request);
+	
+	/**
+	 * 删除被选中的文件
+	 * <p>删除服务器内所有被选中的文件，其过程与删除单个文件类似，只是批量操作了</p>
+	 * @param request HttpServletRequest 对象
+	 * @return String 结果代码：
+	 * <ul>
+	 * <li>noAccount 无用户信息，删除失败</li>
+	 * <li>errorParameter 传参错误，删除失败</li>
+	 * <li>noAuthorized 用户未被授权此操作，删除失败</li>
+	 * <li>cannotDeleteFile 无法删除文件信息，删除失败</li>
+	 * <li>deleteFileSuccess 允许上传</li>
+	 * </ul>
+	 * */
+	String deleteCheckedFiles(HttpServletRequest request);
+	
+	/**
+	 * 下载被选中的文件
+	 * <p>与普通下载类似，但是这种是把全部选中文件以zip形式压缩后再提供用户下载</p>
+	 * @param request HttpServletRequest 请求对象
+	 * @return ResponseEntity
+	 * */
+	void downloadCheckedFiles(HttpServletRequest request,HttpServletResponse response);
 
 }

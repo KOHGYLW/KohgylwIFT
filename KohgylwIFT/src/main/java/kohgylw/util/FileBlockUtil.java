@@ -1,8 +1,12 @@
 package kohgylw.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
@@ -18,7 +22,7 @@ public class FileBlockUtil {
 
 	@Resource
 	private FileMapper fm;
-
+	
 	/**
 	 * 将传入文件存入文件块
 	 * <p>
@@ -83,8 +87,8 @@ public class FileBlockUtil {
 	/**
 	 * 根据path从fileBlocks中取得文件并返回
 	 * 
-	 * @param request
-	 *            HttpServletRequest 请求对象
+	 * @param fileBlocks
+	 *            String 文件块位置
 	 * @param path
 	 *            String node中存入的path信息
 	 * @return File
@@ -130,5 +134,47 @@ public class FileBlockUtil {
 		});
 		checkThread.start();
 	}
-
+	
+	/**
+	 * 根据传入的id生成ZIP文件
+	 * <p>
+	 * 按照id列表代表的文件生成一个ZIP并放入临时文件夹temporaryfiles内。
+	 * </p>
+	 * 
+	 * @param idList
+	 *            List<String> 需要加入压缩文件中的文件id列表
+	 * @param tfPath String 临时文件夹路径
+	 * @param fileBlocks String 文件块路径
+	 * @return String 生成压缩文件的临时文件名，如果生成失败则返回null
+	 */
+	public String createZip(List<String> idList,String tfPath,String fileBlocks) {
+		String zipname="tf_"+UUID.randomUUID().toString()+".zip";
+		File f=new File(tfPath,zipname);
+		try {
+			FileOutputStream fos=new FileOutputStream(f);
+			ZipOutputStream zos=new ZipOutputStream(fos);
+			for(String fid:idList) {
+				kohgylw.model.File node=fm.queryById(fid);
+				if(node!=null) {
+					File block=new File(fileBlocks,node.getFilePath());
+					FileInputStream fis=new FileInputStream(block);
+					zos.putNextEntry(new ZipEntry(node.getFileName()));
+					int count=0;
+					byte[] buffer=new byte[4096];
+					while((count=fis.read(buffer))!=-1) {
+						zos.write(buffer, 0, count);
+					}
+					zos.closeEntry();
+					fis.close();
+				}
+			}
+			zos.close();
+			return zipname;
+		} catch (Exception e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 }

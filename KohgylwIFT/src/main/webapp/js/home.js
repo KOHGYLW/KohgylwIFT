@@ -191,7 +191,7 @@ function showAccountView(folderView) {
 		if (checkAuth(authList, "L")) {
 			$("#parentlistbox")
 					.append(
-							"<button onclick='downloadAllChecked()' class='btn btn-link btn-xs rightbtn'><span class='glyphicon glyphicon-cloud-download'></span> 批量下载</button>");
+							"<button onclick='showDownloadAllCheckedModel()' class='btn btn-link btn-xs rightbtn'><span class='glyphicon glyphicon-cloud-download'></span> 打包下载</button>");
 		}
 		if (checkAuth(authList, "D")) {
 			$("#parentlistbox")
@@ -938,6 +938,24 @@ function checkallfile() {
 	}
 }
 
+function showDownloadAllCheckedModel() {
+	$("#downloadFileBox").html("");
+	var checkedfiles = $(".info").get();
+	if (checkedfiles.length == 0) {
+		$("#downloadFileName")
+				.text(
+						"提示：您还未选择任何文件，请先选中一些文件后再执行本操作（您可以通过点击某一文件行来选中/取消选中文件，也可以通过点击列表上的“文件名”一栏来选中/取消选中所有文件）");
+	} else {
+		$("#downloadFileName").text(
+				"提示：您确认要打包并下载这" + checkedfiles.length + "项么？");
+		$("#downloadFileBox")
+				.html(
+						"<button id='dlmbutton' type='button' class='btn btn-primary' onclick='downloadAllChecked()'>开始下载</button>");
+		$("#dlmbutton").attr('disabled', false);
+	}
+	$("#downloadModal").modal('toggle');
+}
+
 // 下载选中的所有文件
 function downloadAllChecked() {
 	var checkedfiles = $(".info").get();
@@ -950,20 +968,81 @@ function downloadAllChecked() {
 	$("#downloadFileName").text(
 			"提示：准备开始下载（共" + checkedfiles.length + "项），请稍候...");
 	var t = setTimeout("$('#downloadModal').modal('hide');", 1000);
-	// TODO 提交全部下载请求
+	// POST提交全部下载请求
+	var temp = document.createElement("form");
+	temp.action = 'homeController/downloadCheckedFiles.do';
+	temp.method = "post";
+	temp.style.display = "none";
+	var sl = document.createElement("input");
+	sl.name = 'strIdList';
+	sl.value = strIdList;
+	temp.appendChild(sl);
+	document.body.appendChild(temp);
+	temp.submit();
 }
 
 // 删除选中的所有文件
 function showDeleteAllCheckedModel() {
+	$('#deleteFileBox').html("");
 	var checkedfiles = $(".info").get();
-	$('#deleteFileBox')
-			.html(
-					"<button id='dfmbutton' type='button' class='btn btn-danger' onclick='deleteAllChecked()'>全部删除</button>");
 	$("#dfmbutton").attr('disabled', false);
-	$('#deleteFileMessage').text("提示：确定要彻底删除这" + checkedfiles.length + "项么？该操作不可恢复");
+	if (checkedfiles.length == 0) {
+		$('#deleteFileMessage')
+				.text(
+						"提示：您还未选择任何文件，请先选中一些文件后再执行本操作（您可以通过点击某一文件行来选中/取消选中文件，也可以通过点击列表上的“文件名”一栏来选中/取消选中所有文件）");
+	} else {
+		$('#deleteFileBox')
+				.html(
+						"<button id='dfmbutton' type='button' class='btn btn-danger' onclick='deleteAllChecked()'>全部删除</button>");
+		$('#deleteFileMessage').text(
+				"提示：确定要彻底删除这" + checkedfiles.length + "项么？该操作不可恢复");
+	}
 	$('#deleteFileModal').modal('toggle');
 }
 
+// 删除选中的所有文件
 function deleteAllChecked() {
-	//TODO 提交全部删除请求
+	// TODO 提交全部删除请求
+	var checkedfiles = $(".info").get();
+	var downloadIdArray = new Array();
+	for (var i = 0; i < checkedfiles.length; i++) {
+		downloadIdArray[i] = checkedfiles[i].id;
+	}
+	var strIdList = JSON.stringify(downloadIdArray);
+	$("#dfmbutton").attr('disabled', true);
+	$('#deleteFileMessage').text("提示：正在删除，请稍候...");
+	$.ajax({
+		type : "POST",
+		dataType : "text",
+		data : {
+			strIdList : strIdList
+		},
+		url : "homeController/deleteCheckedFiles.ajax",
+		success : function(result) {
+			if (result == "mustLogin") {
+				window.location.href = "login.jsp";
+			} else {
+				if (result == "noAuthorized") {
+					$('#deleteFileMessage').text("提示：您的操作未被授权，删除失败");
+					$("#dfmbutton").attr('disabled', false);
+				} else if (result == "errorParameter") {
+					$('#deleteFileMessage').text("提示：参数不正确，未能全部删除文件");
+					$("#dfmbutton").attr('disabled', false);
+				} else if (result == "cannotDeleteFile") {
+					$('#deleteFileMessage').text("提示：出现意外错误，可能未能删除全部文件");
+					$("#dfmbutton").attr('disabled', false);
+				} else if (result == "deleteFileSuccess") {
+					$('#deleteFileModal').modal('hide');
+					showFolderView(locationpath);
+				} else {
+					$('#deleteFileMessage').text("提示：出现意外错误，可能未能删除全部文件");
+					$("#dfmbutton").attr('disabled', false);
+				}
+			}
+		},
+		error : function() {
+			$('#deleteFileMessage').text("提示：出现意外错误，可能未能删除全部文件");
+			$("#dfmbutton").attr('disabled', false);
+		}
+	});
 }
