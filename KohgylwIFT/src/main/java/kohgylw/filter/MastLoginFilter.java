@@ -39,15 +39,20 @@ public class MastLoginFilter implements Filter {
 		// TODO 自动生成的方法存根
 		ConfigureReader cr = ConfigureReader.instance((HttpServletRequest) request);
 		boolean s = cr.mustLogin();
-		if (s) {
-			HttpServletRequest hsq = (HttpServletRequest) request;
-			HttpServletResponse hsr=(HttpServletResponse) response;
-			String url = hsq.getServletPath();
-			HttpSession session = hsq.getSession();
-			if (url.endsWith(".jsp")||url.endsWith(".do")) {
-				if (url.equals("//login.jsp")||url.equals("/login.jsp")) {
-					chain.doFilter(request, response);
-				} else {
+		HttpServletRequest hsq = (HttpServletRequest) request;
+		HttpServletResponse hsr = (HttpServletResponse) response;
+		String url = hsq.getServletPath();
+		HttpSession session = hsq.getSession();
+		if (url.equals("//login.jsp") || url.equals("/login.jsp")) {
+			String account = (String) session.getAttribute("ACCOUNT");
+			if (cr.foundAccount(account)) {
+				request.getRequestDispatcher("/home.jsp").forward(request, response);
+			} else {
+				chain.doFilter(request, response);
+			}
+		} else {
+			if (s) {
+				if (url.endsWith(".jsp") || url.endsWith(".do")) {
 					if (session.getAttribute("ACCOUNT") != null) {
 						String account = (String) session.getAttribute("ACCOUNT");
 						if (cr.foundAccount(account)) {
@@ -58,33 +63,33 @@ public class MastLoginFilter implements Filter {
 					} else {
 						hsq.getRequestDispatcher("/login.jsp").forward(request, response);
 					}
-				}
-			} else if (url.endsWith(".ajax")) {
-				if (url.equals("/homeController/doLogin.ajax")) {
-					chain.doFilter(request, response);
-				} else {
-					if (session.getAttribute("ACCOUNT") != null) {
-						String account = (String) session.getAttribute("ACCOUNT");
-						if (cr.foundAccount(account)) {
-							chain.doFilter(request, response);
+				} else if (url.endsWith(".ajax")) {
+					if (url.equals("/homeController/doLogin.ajax")) {
+						chain.doFilter(request, response);
+					} else {
+						if (session.getAttribute("ACCOUNT") != null) {
+							String account = (String) session.getAttribute("ACCOUNT");
+							if (cr.foundAccount(account)) {
+								chain.doFilter(request, response);
+							} else {
+								hsr.setCharacterEncoding("UTF-8");
+								PrintWriter pw = hsr.getWriter();
+								pw.print("mustLogin");
+								pw.flush();
+							}
 						} else {
 							hsr.setCharacterEncoding("UTF-8");
-							PrintWriter pw=hsr.getWriter();
+							PrintWriter pw = hsr.getWriter();
 							pw.print("mustLogin");
 							pw.flush();
 						}
-					} else {
-						hsr.setCharacterEncoding("UTF-8");
-						PrintWriter pw=hsr.getWriter();
-						pw.print("mustLogin");
-						pw.flush();
 					}
+				} else {
+					chain.doFilter(request, response);
 				}
-			} else {
+			}else {
 				chain.doFilter(request, response);
 			}
-		} else {
-			chain.doFilter(request, response);
 		}
 	}
 
