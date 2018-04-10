@@ -3,6 +3,7 @@ package kohgylw.service.impl;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -269,7 +270,7 @@ public class FileServiceImpl implements FileService {
 	}
 
 	@Override
-	public void downloadCheckedFiles(HttpServletRequest request, HttpServletResponse response) {
+	public String downloadCheckedFiles(HttpServletRequest request, HttpServletResponse response) {
 		// TODO 自动生成的方法存根
 		String account = (String) request.getSession().getAttribute("ACCOUNT");
 		if (ConfigureReader.instance(request).authorized(account, AccountAuth.DOWNLOAD_FILES)) {
@@ -282,32 +283,41 @@ public class FileServiceImpl implements FileService {
 					String fileBlocks = request.getServletContext().getRealPath("/fileblocks");
 					String tfPath = request.getServletContext().getRealPath("/temporaryfiles");
 					String zipname = fbu.createZip(idList, tfPath, fileBlocks);
-					java.io.File zip = new java.io.File(tfPath, zipname);
-					if (zip.exists()) {
-						response.setContentType("application/force-download");// 以下载方式接受输出流
-						response.setHeader("Content-Length", "" + zip.length());// 告知浏览器文件总大小
-						// 设置能够使用中文编码的文件名
-						response.addHeader("Content-Disposition",
-								"attachment;fileName=" + URLEncoder.encode("kiftd_"+ServerTimeUtil.accurateToDay()+"_打包下载.zip", "UTF-8"));
-						FileInputStream fis = new FileInputStream(zip);
-						BufferedInputStream bis = new BufferedInputStream(fis);
-						OutputStream out = response.getOutputStream();
-						byte[] buffer = new byte[ConfigureReader.instance(request).getBuffSize()];
-						int count = 0;
-						while ((count = bis.read(buffer)) != -1) {
-							out.write(buffer, 0, count);
-						}
-						bis.close();
-						fis.close();
-						lu.writeDownloadCheckedFileEvent(request, idList);
-						zip.delete();//删除临时zip防止越堆越多
-					}
+					lu.writeDownloadCheckedFileEvent(request, idList);
+					return zipname;
 				}
 			} catch (Exception e) {
 				// TODO: handle exception
-				e.printStackTrace();
+			}
+		}
+		return "ERROR";
+	}
+
+	@Override
+	public void downloadCheckedFilesZip(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		// TODO 自动生成的方法存根
+		String zipname = request.getParameter("zipId");
+		if (zipname != null && !zipname.equals("ERROR")) {
+			String tfPath = request.getServletContext().getRealPath("/temporaryfiles");
+			java.io.File zip = new java.io.File(tfPath, zipname);
+			if (zip.exists()) {
+				response.setContentType("application/force-download");// 以下载方式接受输出流
+				response.setHeader("Content-Length", "" + zip.length());// 告知浏览器文件总大小
+				// 设置能够使用中文编码的文件名
+				response.addHeader("Content-Disposition", "attachment;fileName="
+						+ URLEncoder.encode("kiftd_" + ServerTimeUtil.accurateToDay() + "_打包下载.zip", "UTF-8"));
+				FileInputStream fis = new FileInputStream(zip);
+				BufferedInputStream bis = new BufferedInputStream(fis);
+				OutputStream out = response.getOutputStream();
+				byte[] buffer = new byte[ConfigureReader.instance(request).getBuffSize()];
+				int count = 0;
+				while ((count = bis.read(buffer)) != -1) {
+					out.write(buffer, 0, count);
+				}
+				bis.close();
+				fis.close();
+				zip.delete();// 删除临时zip防止越堆越多
 			}
 		}
 	}
-
 }

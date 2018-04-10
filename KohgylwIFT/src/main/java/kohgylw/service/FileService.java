@@ -88,11 +88,20 @@ public interface FileService {
 	String deleteCheckedFiles(HttpServletRequest request);
 	
 	/**
-	 * 下载被选中的文件
-	 * <p>与普通下载类似，但是这种是把全部选中文件以zip形式压缩后再提供用户下载</p>
+	 * 压缩被选中的文件
+	 * <p>与普通下载类似，但是这种是把全部选中文件以zip形式压缩后再提供用户下载，这里提供压缩过程</p>
 	 * @param request HttpServletRequest 请求对象
 	 * @return ResponseEntity
 	 * */
-	void downloadCheckedFiles(HttpServletRequest request,HttpServletResponse response);
+	String downloadCheckedFiles(HttpServletRequest request,HttpServletResponse response);
+	
+	/**
+	 * 下载被选中的文件压缩包
+	 * <p>与普通下载类似，但是这种是把全部选中文件以zip形式压缩后再提供用户下载，这里提供下载过程</p>
+	 * @param request HttpServletRequest 请求对象
+	 * @return ResponseEntity
+	 * @throws Exception 
+	 * */
+	void downloadCheckedFilesZip(HttpServletRequest request,HttpServletResponse response) throws Exception;
 
 }

@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import kohgylw.mapper.FileMapper;
+import net.jpountz.lz4.LZ4BlockOutputStream;
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
 
 @Component
 public class FileBlockUtil {
@@ -160,7 +163,7 @@ public class FileBlockUtil {
 					FileInputStream fis=new FileInputStream(block);
 					zos.putNextEntry(new ZipEntry(node.getFileName()));
 					int count=0;
-					byte[] buffer=new byte[4096];
+					byte[] buffer=new byte[104857600];
 					while((count=fis.read(buffer))!=-1) {
 						zos.write(buffer, 0, count);
 					}

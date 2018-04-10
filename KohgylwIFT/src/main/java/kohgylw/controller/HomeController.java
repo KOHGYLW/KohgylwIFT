@@ -163,8 +163,15 @@ public class HomeController {
 		return fis.deleteCheckedFiles(request);
 	}
 	
-	@RequestMapping("/downloadCheckedFiles.do")
-	public void downloadCheckedFiles(HttpServletRequest request,HttpServletResponse response) {
-		fis.downloadCheckedFiles(request, response);
+	//打包下载所有选中的文件-打包过程
+	@RequestMapping("/downloadCheckedFiles.ajax")
+	public @ResponseBody String downloadCheckedFiles(HttpServletRequest request,HttpServletResponse response) {
+		return fis.downloadCheckedFiles(request, response);
+	}
+	
+	//打包瞎子啊所有选中的文件-下载打包的文件
+	@RequestMapping("/downloadCheckedFilesZip.do")
+	public void downloadCheckedFilesZip(HttpServletRequest request,HttpServletResponse response) throws Exception {
+		fis.downloadCheckedFilesZip(request, response);
 	}
 }
