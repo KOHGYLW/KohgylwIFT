@@ -1,7 +1,6 @@
 package kohgylw.listener;
 
 import java.io.File;
-import java.util.List;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
